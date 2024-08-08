@@ -28,7 +28,7 @@ import pxToRem from "assets/theme/functions/pxToRem";
 const { dark } = colors;
 
 const baseProperties = {
-  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  fontFamily: 'Poppins, sans-serif',
   fontWeightLight: 300,
   fontWeightRegular: 400,
   fontWeightMedium: 500,
@@ -62,36 +62,42 @@ const typography = {
   fontWeightBold: baseProperties.fontWeightBold,
 
   h1: {
+    fontFamily: 'Playfair Display, serif',
     fontSize: pxToRem(48),
     lineHeight: 1.25,
     ...baseHeadingProperties,
   },
 
   h2: {
+    fontFamily: 'Playfair Display, serif',
     fontSize: pxToRem(36),
     lineHeight: 1.3,
     ...baseHeadingProperties,
   },
 
   h3: {
+    fontFamily: 'Playfair Display, serif',
     fontSize: pxToRem(30),
     lineHeight: 1.375,
     ...baseHeadingProperties,
   },
 
   h4: {
+    fontFamily: 'Playfair Display, serif',
     fontSize: pxToRem(24),
     lineHeight: 1.375,
     ...baseHeadingProperties,
   },
 
   h5: {
+    fontFamily: 'Playfair Display, serif',
     fontSize: pxToRem(20),
     lineHeight: 1.375,
     ...baseHeadingProperties,
   },
 
   h6: {
+    fontFamily: 'Playfair Display, serif',
     fontSize: pxToRem(16),
     lineHeight: 1.625,
     ...baseHeadingProperties,
