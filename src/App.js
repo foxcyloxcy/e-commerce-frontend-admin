@@ -14,6 +14,8 @@ import createCache from "@emotion/cache";
 import routes from "routes";
 import { useSoftUIController, setMiniSidenav, setOpenConfigurator } from "context";
 import brand from "assets/images/reloved_icon.png";
+import ProtectedRoute from "ProtectedRoute";
+import PublicRoute from "PublicRoute"; // Import the PublicRoute component
 
 export default function App() {
   const [controller, dispatch] = useSoftUIController();
@@ -21,7 +23,7 @@ export default function App() {
   const [onMouseEnter, setOnMouseEnter] = useState(false);
   const [rtlCache, setRtlCache] = useState(null);
   const { pathname } = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState("");
   const [userToken, setUserToken] = useState("");
   
@@ -54,7 +56,7 @@ export default function App() {
 
   const handleClick = async () => {
     if (storedIsLoggedIn) {
-      setIsLoggedIn(storedIsLoggedIn);
+      setIsLoggedIn(storedIsLoggedIn === "true");
     }
     if (storedUserData) {
       setUserData(storedUserData);
@@ -78,20 +80,15 @@ export default function App() {
     document.body.setAttribute("dir", direction);
 
     if (storedIsLoggedIn) {
-      setIsLoggedIn(storedIsLoggedIn);
-    }else{
-      setIsLoggedIn("")
+      setIsLoggedIn(storedIsLoggedIn === "true");
     }
     if (storedUserData) {
       setUserData(storedUserData);
-    }else{
-      setUserData("")
     }
     if (storedUserToken) {
       setUserToken(storedUserToken);
-    }else{
-      setUserToken("")
     }
+
   }, [direction, handleClick]);
 
   useEffect(() => {
@@ -110,13 +107,29 @@ export default function App() {
           <Route
             exact
             path={route.route}
-            element={<route.component 
-                        isLoggedIn={isLoggedIn} 
-                        userData={userData} 
-                        userToken={userToken} 
-                        refreshParent={handleClick} 
-                        refreshParentLogout={handleClickLogout}
-                      />}
+            element={
+              isLoggedIn ? (
+                <ProtectedRoute isLoggedIn={isLoggedIn}>
+                  <route.component 
+                    isLoggedIn={isLoggedIn} 
+                    userData={userData} 
+                    userToken={userToken} 
+                    refreshParent={handleClick} 
+                    refreshParentLogout={handleClickLogout} 
+                  />
+                </ProtectedRoute>
+              ) : (
+                <PublicRoute isLoggedIn={isLoggedIn}>
+                  <route.component 
+                    isLoggedIn={isLoggedIn} 
+                    userData={userData} 
+                    userToken={userToken} 
+                    refreshParent={handleClick} 
+                    refreshParentLogout={handleClickLogout} 
+                  />
+                </PublicRoute>
+              )
+            }
             key={route.key}
           />
         );
@@ -168,12 +181,10 @@ export default function App() {
         {layout === "vr" && <Configurator />}
         <Routes>
           {getRoutes(routes)}
-          {
-          isLoggedIn? 
-          <Route path="*" element={<Navigate to="/" />} />
-          :<Route path="*" element={<Navigate to="/authentication/sign-in" />} />
-          }
-          
+          <Route
+            path="*"
+            element={<Navigate to="/authentication/sign-in" />}
+          />
         </Routes>
       </ThemeProvider>
     </CacheProvider>
@@ -195,11 +206,10 @@ export default function App() {
       {layout === "vr" && <Configurator />}
       <Routes>
         {getRoutes(routes)}
-        {
-          isLoggedIn? 
-          <Route path="*" element={<Navigate to="/" />} />
-          :<Route path="*" element={<Navigate to="/authentication/sign-in" />} />
-          }
+        <Route
+          path="*"
+          element={<Navigate to="/authentication/sign-in" />}
+        />
       </Routes>
     </ThemeProvider>
   );
