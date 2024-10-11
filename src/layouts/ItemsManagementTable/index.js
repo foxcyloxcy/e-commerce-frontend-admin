@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Card from "@mui/material/Card";
 import SoftBox from "components/SoftBox";
 import SoftTypography from "components/SoftTypography";
+import SoftButton from "components/SoftButton";
 import SoftAvatar from "components/SoftAvatar";
 import SoftBadge from "components/SoftBadge";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -45,12 +46,12 @@ function ItemsApprovalTable(props) {
 
         const newRows = data.map((item) => ({
           'Item name': (
-            <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+            <SoftTypography variant="caption" color="secondary" fontWeight="small">
               {item.item_name}
             </SoftTypography>
           ),
           'Item description': (
-            <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+            <SoftTypography variant="caption" color="secondary" fontWeight="small">
               {item.item_description}
             </SoftTypography>
           ),
@@ -78,26 +79,26 @@ function ItemsApprovalTable(props) {
           ),
           action: (
             <SoftBox display="flex" flexDirection="column">
-              <SoftTypography
+              <SoftButton
                 component="button"
-                variant="caption"
-                color="secondary"
+                variant="contained"
+                color="primary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
                 onClick={() => handleApprove(item.uuid)}
               >
                 Edit
-              </SoftTypography>
-              <SoftTypography
+              </SoftButton>
+              <SoftButton
                 component="button"
-                variant="caption"
-                color="secondary"
+                variant="contained"
+                color="primary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
                 onClick={() => handleOpenRejectDialog(item.uuid)}
               >
                 Archive
-              </SoftTypography>
+              </SoftButton>
             </SoftBox>
           ),
         }));
