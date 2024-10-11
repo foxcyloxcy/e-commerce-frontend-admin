@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Card from "@mui/material/Card";
 import SoftBox from "components/SoftBox";
 import SoftTypography from "components/SoftTypography";
+import SoftButton from "components/SoftButton";
 import SoftAvatar from "components/SoftAvatar";
 import SoftBadge from "components/SoftBadge";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -19,7 +20,7 @@ const initialAuthorsTableData = {
     { name: "Item name", align: "left" },
     { name: "Item description", align: "left" },
     { name: "Item image", align: "left" },
-    { name: "status", align: "center" },
+    // { name: "status", align: "center" },
     { name: "Posted on", align: "center" },
     { name: "action", align: "center" },
   ],
@@ -48,12 +49,17 @@ function ItemsApprovalTable(props) {
 
         const newRows = data.map((item) => ({
           'Item name': (
-            <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+            <SoftTypography variant="caption" color="secondary" fontWeight="small">
               {item.item_name}
             </SoftTypography>
           ),
           'Item description': (
-            <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+            <SoftTypography variant="caption" color="secondary" fontWeight="small"
+            style={{
+              whiteSpace: "normal",
+              wordWrap: "break-word",
+              width: '50px'
+            }}>
               {item.item_description}
             </SoftTypography>
           ),
@@ -62,15 +68,15 @@ function ItemsApprovalTable(props) {
               <SoftAvatar src={item.default_image ? item.default_image.image_url : item.item_image[0]} alt={item.item_name} size="sm" variant="rounded" />
             </SoftBox>
           ),
-          status: (
-            <SoftBadge
-              variant="gradient"
-              badgeContent={item.status_name}
-              color={item.status === 0 ? "secondary" : "secondary"}
-              size="xs"
-              container
-            />
-          ),
+          // status: (
+          //   <SoftBadge
+          //     variant="gradient"
+          //     badgeContent={item.status_name}
+          //     color={item.status === 0 ? "secondary" : "primary"}
+          //     size="xs"
+          //     container
+          //   />
+          // ),
           'Posted on': (
             <SoftTypography variant="caption" color="secondary" fontWeight="medium">
               {dateFormatter(item.created_at)}
@@ -78,26 +84,26 @@ function ItemsApprovalTable(props) {
           ),
           action: (
             <SoftBox display="flex" flexDirection="column">
-              <SoftTypography
+              <SoftButton
                 component="button"
-                variant="caption"
-                color="secondary"
+                variant="contained"
+                color="primary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
                 onClick={() => handleApprove(item.uuid)}
               >
                 Approve
-              </SoftTypography>
-              <SoftTypography
+              </SoftButton>
+              <SoftButton
                 component="button"
-                variant="caption"
-                color="secondary"
+                variant="contained"
+                color="primary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
                 onClick={() => handleOpenRejectDialog(item.uuid)}
               >
                 Reject
-              </SoftTypography>
+              </SoftButton>
             </SoftBox>
           ),
         }));
