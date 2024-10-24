@@ -10,7 +10,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Table from "examples/Tables/Table";
 import api from "../../assets/baseURL/api";
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, TextField } from "@mui/material";
+import Swal from 'sweetalert2';
 import moment from 'moment';
 
 // Initial Data
@@ -42,6 +42,7 @@ function ItemsApprovalTable(props) {
       });
 
       if (res.status === 200) {
+        console.log(res.data)
         const data = res.data.data.data;
 
         const newRows = data.map((item) => ({
@@ -95,7 +96,7 @@ function ItemsApprovalTable(props) {
                 color="primary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
-                onClick={() => handleOpenRejectDialog(item.uuid)}
+                onClick={() => handleReject(item.uuid)}
               >
                 Archive
               </SoftButton>
@@ -133,37 +134,35 @@ function ItemsApprovalTable(props) {
     }
   };
 
-  const handleOpenRejectDialog = (itemId) => {
-    setSelectedItemId(itemId);
-    setOpen(true);
-  };
-
   const dateFormatter = (dateToFormat) =>{
     let currentDate = moment(dateToFormat).format('YYYY/MM/DD, h:mm a');
 
     return currentDate
   }
 
-  const handleCloseRejectDialog = () => {
-    setOpen(false);
-    setSelectedItemId(null);
-    setRejectionReason("");
-  };
-
-  const handleReject = async () => {
-    try {
-      const res = await api.patch(`items/${selectedItemId}`, { status: 3, rejection_reason: rejectionReason }, {
-        headers: {
-          'Authorization': `Bearer ${userToken}`
+  const handleReject = async (itemUuid) => {
+    Swal.fire({
+      title: 'Wait!',
+      text: 'Are you sure you want to archive this item?',
+      icon: 'warning',
+      confirmButtonText: 'Yes',
+      showCancelButton: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await api.delete(`items/${itemUuid}`, {
+            headers: {
+              'Authorization': `Bearer ${userToken}`
+            }
+          });
+          if (res.status === 200) {
+            await loadProducts();  // Ensure this is awaited to trigger properly
+          }
+        } catch (error) {
+          console.log(error);
         }
-      });
-      if (res.status === 200) {
-        handleCloseRejectDialog();
-        loadProducts();
       }
-    } catch (error) {
-      console.log(error);
-    }
+    });
   };
 
   const { columns, rows } = authorsTableData;
@@ -193,32 +192,6 @@ function ItemsApprovalTable(props) {
         </SoftBox>
       </SoftBox>
 
-      <Dialog open={open} onClose={handleCloseRejectDialog}>
-        <DialogTitle>Reason for Rejecting</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please provide a reason for rejecting this item.
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="reason"
-            label="Rejection Reason"
-            type="text"
-            fullWidth
-            value={rejectionReason}
-            onChange={(e) => setRejectionReason(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseRejectDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleReject} color="primary">
-            Archive
-          </Button>
-        </DialogActions>
-      </Dialog>
     </DashboardLayout>
   );
 }
