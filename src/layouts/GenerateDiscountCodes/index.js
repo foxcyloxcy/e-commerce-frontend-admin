@@ -182,23 +182,23 @@ function GenerateDiscountCodes(props) {
   }
 
   const handleInputChange = useCallback((event) => {
-    console.log(event)
     const { name, value } = event.target;
     setFormValues({ ...formValues, [name]: value });
     setFormErrors({ ...formErrors, [name]: '' });
   }, [formValues, formErrors]);
 
 
-  const handleDisableCode = async () => {
+  const handleDisableCode = async (id) => {
     try {
-      const res = await api.patch(`items/reject/${selectedItemId}`, 
-        { status: 2, reject_reason: rejectionReason }, {
+      const res = await api.patch(`discounts/${id}?`, 
+        { status: 0 },
+        {
         headers: {
           'Authorization': `Bearer ${userToken}`
         }
       });
+      console.log(res)
       if (res.status === 200) {
-        handleCloseRejectDialog();
         loadGeneratedCodes();
       }
     } catch (error) {
