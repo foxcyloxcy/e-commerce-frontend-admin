@@ -2,6 +2,7 @@
 import Dashboard from "layouts/dashboard";
 import ItemsManagementTable from "layouts/ItemsManagementTable";
 import ItemsApprovalTable from "layouts/ItemsApprovalTable"
+import GenerateDiscountCodes from "layouts/GenerateDiscountCodes";
 import Billing from "layouts/billing";
 // import VirtualReality from "layouts/virtual-reality";
 import RTL from "layouts/rtl";
@@ -34,6 +35,14 @@ const routes = [
     key: "dashboard",
     route: "/dashboard",
     component: Dashboard,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "Discount Codes",
+    key: "generate-discount",
+    route: "/generate-discount",
+    component: GenerateDiscountCodes,
     noCollapse: true,
   },
   {
