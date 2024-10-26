@@ -72,7 +72,7 @@ function GenerateDiscountCodes(props) {
               }
               color={
                 item.status === 0 ? "secondary" : 
-                item.status === 1 ? "primary" : 
+                item.status === 1 ? "success" : 
                 "error"}
               size="xs"
               container
@@ -91,7 +91,7 @@ function GenerateDiscountCodes(props) {
                 color="primary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
-                onClick={() => handleEnableCode(item.uuid)}
+                onClick={() => handleEnableCode(item.id)}
               >
                 Enable
               </SoftButton>
@@ -101,7 +101,7 @@ function GenerateDiscountCodes(props) {
                 color="secondary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
-                onClick={() => handleDisableCode(item.uuid)}
+                onClick={() => handleDisableCode(item.id)}
               >
                 Disable
               </SoftButton>
@@ -123,9 +123,9 @@ function GenerateDiscountCodes(props) {
     loadGeneratedCodes();
   }, [loadGeneratedCodes]);
 
-  const handleEnableCode = async (itemId) => {
+  const handleEnableCode = async (id) => {
     try {
-      const res = await api.patch(`items/approve/${itemId}`, 
+      const res = await api.patch(`discounts/${id}?`, 
         { status: 1 },
         {
         headers: {
@@ -230,7 +230,7 @@ function GenerateDiscountCodes(props) {
               <SoftInput
                 type="percentage"
                 name="percentage"
-                placeholder="Enter percentage here..."
+                placeholder="No. of percentage here..."
                 icon={{ component: "none", direction: "left" }}
                 value={formValues.percentage}
                 onChange={handleInputChange}
