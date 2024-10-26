@@ -72,7 +72,7 @@ function GenerateDiscountCodes(props) {
               }
               color={
                 item.status === 0 ? "secondary" : 
-                item.status === 1 ? "success" : 
+                item.status === 1 ? "primary" : 
                 "error"}
               size="xs"
               container
@@ -98,7 +98,7 @@ function GenerateDiscountCodes(props) {
               <SoftButton
                 component="button"
                 variant="contained"
-                color="primary"
+                color="secondary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
                 onClick={() => handleDisableCode(item.uuid)}
