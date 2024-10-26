@@ -20,8 +20,7 @@ const initialAuthorsTableData = {
   columns: [
     { name: "Code", align: "left" },
     { name: "Percentage", align: "left" },
-    { name: "Status", align: "left" },
-    // { name: "status", align: "center" },
+    { name: "status", align: "center" },
     { name: "Created at", align: "center" },
     { name: "action", align: "center" },
   ],
@@ -38,19 +37,20 @@ function GenerateDiscountCodes(props) {
 
   const loadGeneratedCodes = useCallback(async () => {
     try {
-      const res = await api.get('items/status/pending', {
+      const res = await api.get(`discounts?page=1&limit=10`, {
         headers: {
           'Authorization': `Bearer ${userToken}`
         }
       });
 
       if (res.status === 200) {
+        console.log(res.data)
         const data = res.data.data.data;
 
         const newRows = data.map((item) => ({
           'Code': (
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
-              {item.item_name}
+              {item.code}
             </SoftTypography>
           ),
           'Percentage': (
@@ -60,7 +60,7 @@ function GenerateDiscountCodes(props) {
               wordWrap: "break-word",
               width: '50px'
             }}>
-              {item.item_description}
+              {item.discount_percentage}%
             </SoftTypography>
           ),
           status: (
@@ -141,7 +141,7 @@ function GenerateDiscountCodes(props) {
     }
   };
 
-  const handleGenerateCode = () => {
+  const handleGenerateCode = async () => {
     let errors = {};
 
     if (!formValues.code) {
@@ -155,6 +155,23 @@ function GenerateDiscountCodes(props) {
     setFormErrors(errors);
 
     if (Object.keys(errors).length === 0) {
+      try {
+        const res = await api.post(`discounts`, 
+          { code: formValues.code,
+            discount_percentage : formValues.percentage
+           },
+          {
+          headers: {
+            'Authorization': `Bearer ${userToken}`
+          }
+        });
+        console.log(res)
+        if (res.status === 200) {
+          loadGeneratedCodes();
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
