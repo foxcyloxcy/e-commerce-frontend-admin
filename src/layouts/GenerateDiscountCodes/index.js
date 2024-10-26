@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React, { useCallback, useEffect, useState } from "react";
 import Card from "@mui/material/Card";
+import SoftInput from "components/SoftInput";
 import SoftBox from "components/SoftBox";
 import SoftTypography from "components/SoftTypography";
 import SoftButton from "components/SoftButton";
@@ -27,16 +28,15 @@ const initialAuthorsTableData = {
   rows: [],
 };
 
-function GenerateDiscoutCodes(props) {
+function GenerateDiscountCodes(props) {
   const { isLoggedIn, userData, userToken, refreshParentLogout } = props
-  console.log(userToken)
   const [authorsTableData, setAuthorsTableData] = useState(initialAuthorsTableData);
-  const [open, setOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
-  const [rejectionReason, setRejectionReason] = useState("");
+  const [formValues, setFormValues] = useState({ code: '', percentage: '' });
+  const [formErrors, setFormErrors] = useState({ code: '', percentage: '' });
 
 
-  const loadProducts = useCallback(async () => {
+  const loadGeneratedCodes = useCallback(async () => {
     try {
       const res = await api.get('items/status/pending', {
         headers: {
@@ -63,10 +63,20 @@ function GenerateDiscoutCodes(props) {
               {item.item_description}
             </SoftTypography>
           ),
-          'Status': (
-            <SoftBox mr={2}>
-              <SoftAvatar src={item.default_image ? item.default_image.image_url : item.item_image[0]} alt={item.item_name} size="sm" variant="rounded" />
-            </SoftBox>
+          status: (
+            <SoftBadge
+              variant="gradient"
+              badgeContent={
+                item.status === 0 ? "Disabled" : 
+                item.status === 1 ? "Enabled" : "error"
+              }
+              color={
+                item.status === 0 ? "secondary" : 
+                item.status === 1 ? "success" : 
+                "error"}
+              size="xs"
+              container
+            />
           ),
           'Created at': (
             <SoftTypography variant="caption" color="secondary" fontWeight="medium">
@@ -81,7 +91,7 @@ function GenerateDiscoutCodes(props) {
                 color="primary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
-                onClick={() => handleApprove(item.uuid)}
+                onClick={() => handleEnableCode(item.uuid)}
               >
                 Enable
               </SoftButton>
@@ -91,7 +101,7 @@ function GenerateDiscoutCodes(props) {
                 color="primary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
-                onClick={() => handleOpenRejectDialog(item.uuid)}
+                onClick={() => handleDisableCode(item.uuid)}
               >
                 Disable
               </SoftButton>
@@ -110,10 +120,10 @@ function GenerateDiscoutCodes(props) {
   }, [userToken]);
 
   useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
+    loadGeneratedCodes();
+  }, [loadGeneratedCodes]);
 
-  const handleApprove = async (itemId) => {
+  const handleEnableCode = async (itemId) => {
     try {
       const res = await api.patch(`items/approve/${itemId}`, 
         { status: 1 },
@@ -124,16 +134,28 @@ function GenerateDiscoutCodes(props) {
       });
       console.log(res)
       if (res.status === 200) {
-        loadProducts();
+        loadGeneratedCodes();
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleOpenRejectDialog = (itemId) => {
-    setSelectedItemId(itemId);
-    setOpen(true);
+  const handleGenerateCode = () => {
+    let errors = {};
+
+    if (!formValues.code) {
+      errors.code = 'Enter code field is required.';
+    }
+
+    if (!formValues.percentage) {
+      errors.percentage = 'Enter percentage field is required.';
+    }
+
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length === 0) {
+    }
   };
 
   const dateFormatter = (dateToFormat) =>{
@@ -142,13 +164,15 @@ function GenerateDiscoutCodes(props) {
     return currentDate
   }
 
-  const handleCloseRejectDialog = () => {
-    setOpen(false);
-    setSelectedItemId(null);
-    setRejectionReason("");
-  };
+  const handleInputChange = useCallback((event) => {
+    console.log(event)
+    const { name, value } = event.target;
+    setFormValues({ ...formValues, [name]: value });
+    setFormErrors({ ...formErrors, [name]: '' });
+  }, [formValues, formErrors]);
 
-  const handleReject = async () => {
+
+  const handleDisableCode = async () => {
     try {
       const res = await api.patch(`items/reject/${selectedItemId}`, 
         { status: 2, reject_reason: rejectionReason }, {
@@ -158,7 +182,7 @@ function GenerateDiscoutCodes(props) {
       });
       if (res.status === 200) {
         handleCloseRejectDialog();
-        loadProducts();
+        loadGeneratedCodes();
       }
     } catch (error) {
       console.log(error);
@@ -176,6 +200,36 @@ function GenerateDiscoutCodes(props) {
             <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
               <SoftTypography variant="h6">Discount Codes</SoftTypography>
             </SoftBox>
+            <SoftBox display="flex" flexDirection="row" sx={{ ml: 1, mb: 2 }}>
+              <SoftInput
+                placeholder="Enter code here..."
+                type="code"
+                name="code"
+                icon={{ component: "none", direction: "left" }}
+                value={formValues.code}
+                onChange={handleInputChange}
+                error={!!formErrors.code}
+              />
+              <SoftInput
+                type="percentage"
+                name="percentage"
+                placeholder="Enter percentage here..."
+                icon={{ component: "none", direction: "left" }}
+                value={formValues.percentage}
+                onChange={handleInputChange}
+                error={!!formErrors.percentage}
+              />
+              <SoftButton
+                component="button"
+                variant="contained"
+                color="primary"
+                fontWeight="small"
+                sx={{ ml: 1 }}
+                onClick={() => handleGenerateCode()}
+              >
+                Generate Code
+              </SoftButton>
+            </SoftBox>
             <SoftBox
               sx={{
                 "& .MuiTableRow-root:not(:last-child)": {
@@ -191,35 +245,8 @@ function GenerateDiscoutCodes(props) {
           </Card>
         </SoftBox>
       </SoftBox>
-
-      <Dialog open={open} onClose={handleCloseRejectDialog}>
-        <DialogTitle>Reason for Rejecting</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please provide a reason for rejecting this item.
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="reason"
-            label="Rejection Reason"
-            type="text"
-            fullWidth
-            value={rejectionReason}
-            onChange={(e) => setRejectionReason(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseRejectDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleReject} color="primary">
-            Reject
-          </Button>
-        </DialogActions>
-      </Dialog>
     </DashboardLayout>
   );
 }
 
-export default GenerateDiscoutCodes;
+export default GenerateDiscountCodes;
