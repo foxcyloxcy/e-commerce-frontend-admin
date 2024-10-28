@@ -20,7 +20,7 @@ const initialAuthorsTableData = {
     { name: "Item name", align: "left" },
     { name: "Item description", align: "left" },
     { name: "Item image", align: "left" },
-    // { name: "status", align: "center" },
+    { name: "Location", align: "left" },
     { name: "Posted on", align: "center" },
     { name: "action", align: "center" },
   ],
@@ -35,6 +35,11 @@ function ItemsApprovalTable(props) {
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
 
+  const handleParseAddress = (address) => {
+    const parseAddress = JSON.parse(address)
+    console.log(parseAddress)
+    return parseAddress[0].formatted_address
+  };
 
   const loadProducts = useCallback(async () => {
     try {
@@ -44,6 +49,7 @@ function ItemsApprovalTable(props) {
         }
       });
 
+      console.log(res.data)
       if (res.status === 200) {
         const data = res.data.data.data;
 
@@ -68,15 +74,11 @@ function ItemsApprovalTable(props) {
               <SoftAvatar src={item.default_image ? item.default_image.image_url : item.item_image[0]} alt={item.item_name} size="sm" variant="rounded" />
             </SoftBox>
           ),
-          // status: (
-          //   <SoftBadge
-          //     variant="gradient"
-          //     badgeContent={item.status_name}
-          //     color={item.status === 0 ? "secondary" : "primary"}
-          //     size="xs"
-          //     container
-          //   />
-          // ),
+          'Location': (
+            <SoftTypography variant="caption" color="secondary" fontWeight="small">
+              {handleParseAddress(item.address)}
+            </SoftTypography>
+          ),
           'Posted on': (
             <SoftTypography variant="caption" color="secondary" fontWeight="medium">
               {dateFormatter(item.created_at)}
