@@ -81,7 +81,7 @@ function Table({ columns, rows }) {
               <SoftBox mr={2}>
                 <SoftAvatar src={row[name][0]} name={row[name][1]} variant="rounded" size="sm" />
               </SoftBox>
-              <SoftTypography variant="button" fontWeight="medium" sx={{ width: "max-content" }}>
+              <SoftTypography variant="button" fontWeight="medium" sx={{ width: "min-content" }}>
                 {row[name][1]}
               </SoftTypography>
             </SoftBox>
@@ -100,7 +100,7 @@ function Table({ columns, rows }) {
               variant="button"
               fontWeight="regular"
               color="secondary"
-              sx={{ display: "inline-block", width: "max-content" }}
+              sx={{ display: "inline-block", width: "min-content" }}
             >
               {row[name]}
             </SoftTypography>

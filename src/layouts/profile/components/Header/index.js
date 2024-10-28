@@ -40,6 +40,7 @@ import breakpoints from "assets/theme/base/breakpoints";
 
 // Images
 import burceMars from "assets/images/bruce-mars.jpg";
+import annieImg  from "assets/images/annie.jpg"
 import curved0 from "assets/images/curved-images/curved0.jpg";
 
 function Header() {
@@ -86,7 +87,7 @@ function Header() {
         <Grid container spacing={3} alignItems="center">
           <Grid item>
             <SoftAvatar
-              src={burceMars}
+              src={annieImg}
               alt="profile-image"
               variant="rounded"
               size="xl"
