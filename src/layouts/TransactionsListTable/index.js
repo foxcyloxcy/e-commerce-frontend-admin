@@ -4,15 +4,12 @@ import Card from "@mui/material/Card";
 import SoftBox from "components/SoftBox";
 import SoftTypography from "components/SoftTypography";
 import SoftButton from "components/SoftButton";
-import SoftAvatar from "components/SoftAvatar";
-import SoftBadge from "components/SoftBadge";
+import Table from "examples/Tables/Table";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
-import Table from "examples/Tables/Table";
-import api from "../../assets/baseURL/api";
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, TextField } from "@mui/material";
-import moment from 'moment';
+import api from "../../assets/baseURL/api";
+import moment from "moment";
 
 // Initial Data
 const initialAuthorsTableData = {
@@ -28,52 +25,53 @@ const initialAuthorsTableData = {
 };
 
 function TransactionsList(props) {
-  const { isLoggedIn, userData, userToken, refreshParentLogout } = props
+  const { isLoggedIn, userData, userToken, refreshParentLogout } = props;
   const [authorsTableData, setAuthorsTableData] = useState(initialAuthorsTableData);
   const [open, setOpen] = useState(false);
-  const [selectedItemId, setSelectedItemId] = useState(null);
-  const [rejectionReason, setRejectionReason] = useState("");
-
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   const loadProducts = useCallback(async () => {
     try {
-      const res = await api.get('transactions?page=1&limit=1000', {
+      const res = await api.get("transactions?page=1&limit=1000", {
         headers: {
-          'Authorization': `Bearer ${userToken}`
-        }
+          Authorization: `Bearer ${userToken}`,
+        },
       });
 
-      console.log(res.data.data.data)
       if (res.status === 200) {
         const data = res.data.data.data;
 
         const newRows = data.map((transaction) => ({
-          'Date of Transaction': (
+          "Date of Transaction": (
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
               {dateFormatter(transaction.transaction_item.created_at)}
             </SoftTypography>
           ),
-          'Transaction price': (
-            <SoftTypography variant="caption" color="secondary" fontWeight="small"
-            style={{
-              whiteSpace: "normal",
-              wordWrap: "break-word",
-              width: '50px'
-            }}>
+          "Transaction price": (
+            <SoftTypography
+              variant="caption"
+              color="secondary"
+              fontWeight="small"
+              style={{
+                whiteSpace: "normal",
+                wordWrap: "break-word",
+                width: "50px",
+              }}
+            >
               {transaction.transaction_item.item?.total_fee_breakdown?.total}
             </SoftTypography>
           ),
-          'Platform fee': (
+          "Platform fee": (
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
-             {transaction.transaction_item.item?.total_fee_breakdown?.platform_fee}
+              {transaction.transaction_item.item?.total_fee_breakdown?.platform_fee}
             </SoftTypography>
           ),
-          'Buyer': (
+          Buyer: (
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
               {transaction.buyer.first_name} {transaction.buyer.last_name}
             </SoftTypography>
           ),
-          'Seller': (
+          Seller: (
             <SoftTypography variant="caption" color="secondary" fontWeight="medium">
               {transaction.seller.first_name} {transaction.seller.last_name}
             </SoftTypography>
@@ -86,9 +84,9 @@ function TransactionsList(props) {
                 color="primary"
                 fontWeight="small"
                 sx={{ mb: 1 }}
-                onClick={() => handleApprove(item.uuid)}
+                onClick={() => handleOpenModal(transaction)}
               >
-                Details
+                Full details
               </SoftButton>
             </SoftBox>
           ),
@@ -108,59 +106,26 @@ function TransactionsList(props) {
     loadProducts();
   }, [loadProducts]);
 
-  const handleApprove = async (itemId) => {
-    try {
-      const res = await api.patch(`items/approve/${itemId}`, 
-        { status: 1 },
-        {
-        headers: {
-          'Authorization': `Bearer ${userToken}`
-        }
-      });
-      console.log(res)
-      if (res.status === 200) {
-        loadProducts();
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  const handleOpenModal = (transaction) => {
+    setSelectedTransaction(transaction);
+    setOpen(true);
   };
 
-
-  const dateFormatter = (dateToFormat) =>{
-    let currentDate = moment(dateToFormat).format('YYYY/MM/DD, h:mm a');
-
-    return currentDate
-  }
-
-  const handleCloseRejectDialog = () => {
+  const handleCloseModal = () => {
     setOpen(false);
-    setSelectedItemId(null);
-    setRejectionReason("");
+    setSelectedTransaction(null);
   };
 
-  const handleReject = async () => {
-    try {
-      const res = await api.patch(`items/reject/${selectedItemId}`, 
-        { status: 2, reject_reason: rejectionReason }, {
-        headers: {
-          'Authorization': `Bearer ${userToken}`
-        }
-      });
-      if (res.status === 200) {
-        handleCloseRejectDialog();
-        loadProducts();
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  const dateFormatter = (dateToFormat) => {
+    let currentDate = moment(dateToFormat).format("YYYY/MM/DD, h:mm a");
+    return currentDate;
   };
 
   const { columns, rows } = authorsTableData;
 
   return (
     <DashboardLayout>
-      <DashboardNavbar refreshParentLogout={refreshParentLogout}/>
+      <DashboardNavbar refreshParentLogout={refreshParentLogout} />
       <SoftBox py={3}>
         <SoftBox mb={3}>
           <Card>
@@ -182,6 +147,47 @@ function TransactionsList(props) {
           </Card>
         </SoftBox>
       </SoftBox>
+
+      {/* Modal for Transaction Details */}
+      {selectedTransaction && (
+        <Dialog open={open} aria-labelledby="transaction-details-dialog">
+          <DialogTitle id="transaction-details-dialog">Transaction Details</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              <strong>Buyer:</strong> {selectedTransaction.buyer.first_name}{" "}
+              {selectedTransaction.buyer.last_name} <br />
+              <strong>Buyer Mobile:</strong> {selectedTransaction.buyer.mobile_number} <br />
+              <strong>Buyer Email:</strong> {selectedTransaction.buyer.email} <br />
+              <br />
+              <strong>Seller:</strong> {selectedTransaction.seller.first_name}{" "}
+              {selectedTransaction.seller.last_name} <br />
+              <strong>Seller Mobile:</strong> {selectedTransaction.seller.mobile_number} <br />
+              <strong>Seller Email:</strong> {selectedTransaction.seller.email} <br />
+              <br />
+              <strong>Date of Transaction:</strong> {dateFormatter(selectedTransaction.transaction_item.created_at)}{" "}
+              <br />
+              <strong>Item Total:</strong>{" "}
+              {selectedTransaction.transaction_item.item?.total_fee_breakdown?.item} <br />
+              <strong>Platform Fee Percentage:</strong>{" "}
+              {selectedTransaction.transaction_item.item?.total_fee_breakdown?.platform_fee_percentage}{" "}
+              <br />
+              <strong>Platform Fee:</strong>{" "}
+              {selectedTransaction.transaction_item.item?.total_fee_breakdown?.platform_fee} <br />
+              <strong>Transaction Price:</strong>{" "}
+              {selectedTransaction.transaction_item.item?.total_fee_breakdown?.total} <br />
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <SoftButton
+                component="button"
+                variant="contained"
+                color="primary"
+                fontWeight="small"
+                onClick={handleCloseModal}
+              >Close</SoftButton>
+          </DialogActions>
+        </Dialog>
+      )}
     </DashboardLayout>
   );
 }
