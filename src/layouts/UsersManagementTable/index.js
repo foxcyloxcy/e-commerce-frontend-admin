@@ -17,33 +17,26 @@ import moment from 'moment';
 // Initial Data
 const initialAuthorsTableData = {
   columns: [
-    { name: "Item name", align: "left" },
-    { name: "Item description", align: "left" },
-    { name: "Item image", align: "left" },
-    { name: "Location", align: "left" },
-    { name: "Posted on", align: "center" },
-    { name: "action", align: "center" },
+    { name: "Full name", align: "left" },
+    { name: "Email", align: "left" },
+    { name: "Phone no.", align: "left" },
+    { name: "Created at", align: "left" },
+    // { name: "action", align: "center" },
   ],
   rows: [],
 };
 
 function UsersManagement(props) {
   const { isLoggedIn, userData, userToken, refreshParentLogout } = props
-  console.log(userToken)
   const [authorsTableData, setAuthorsTableData] = useState(initialAuthorsTableData);
   const [open, setOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
 
-  const handleParseAddress = (address) => {
-    const parseAddress = JSON.parse(address)
-    console.log(parseAddress)
-    return parseAddress[0].formatted_address
-  };
-
   const loadProducts = useCallback(async () => {
     try {
-      const res = await api.get('items/status/pending', {
+      // const res = await api.get('users??page=1&limit=10&filter[keyword]=ian', {
+      const res = await api.get('users?page=1&limit=1000', {
         headers: {
           'Authorization': `Bearer ${userToken}`
         }
@@ -53,61 +46,46 @@ function UsersManagement(props) {
       if (res.status === 200) {
         const data = res.data.data.data;
 
-        const newRows = data.map((item) => ({
-          'Item name': (
+        const newRows = data.map((user) => ({
+          'Full name': (
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
-              {item.item_name}
+              {user.first_name} {user.last_name}
             </SoftTypography>
           ),
-          'Item description': (
+          'Email': (
             <SoftTypography variant="caption" color="secondary" fontWeight="small"
             style={{
               whiteSpace: "normal",
               wordWrap: "break-word",
               width: '50px'
             }}>
-              {item.item_description}
+              {user.email}
             </SoftTypography>
           ),
-          'Item image': (
-            <SoftBox mr={2}>
-              <SoftAvatar src={item.default_image ? item.default_image.image_url : item.item_image[0]} alt={item.item_name} size="sm" variant="rounded" />
-            </SoftBox>
-          ),
-          'Location': (
-            <SoftTypography variant="caption" color="secondary" fontWeight="small">
-              {handleParseAddress(item.address)}
-            </SoftTypography>
-          ),
-          'Posted on': (
+          'Phone no.': (
             <SoftTypography variant="caption" color="secondary" fontWeight="medium">
-              {dateFormatter(item.created_at)}
+              {user.mobile_number}
             </SoftTypography>
           ),
-          action: (
-            <SoftBox display="flex" flexDirection="column">
-              <SoftButton
-                component="button"
-                variant="contained"
-                color="primary"
-                fontWeight="small"
-                sx={{ mb: 1 }}
-                onClick={() => handleApprove(item.uuid)}
-              >
-                Approve
-              </SoftButton>
-              <SoftButton
-                component="button"
-                variant="contained"
-                color="primary"
-                fontWeight="small"
-                sx={{ mb: 1 }}
-                onClick={() => handleOpenRejectDialog(item.uuid)}
-              >
-                Reject
-              </SoftButton>
-            </SoftBox>
+          'Created at': (
+            <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+              {dateFormatter(user.created_at)}
+            </SoftTypography>
           ),
+          // action: (
+          //   <SoftBox display="flex" flexDirection="column">
+          //     <SoftButton
+          //       component="button"
+          //       variant="contained"
+          //       color="primary"
+          //       fontWeight="small"
+          //       sx={{ mb: 1 }}
+          //       onClick={() => handleApprove(user.uuid)}
+          //     >
+          //       Approve
+          //     </SoftButton>
+          //   </SoftBox>
+          // ),
         }));
 
         setAuthorsTableData((prevState) => ({
@@ -185,7 +163,7 @@ function UsersManagement(props) {
         <SoftBox mb={3}>
           <Card>
             <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-              <SoftTypography variant="h6">Items to approve</SoftTypography>
+              <SoftTypography variant="h6">Users Management</SoftTypography>
             </SoftBox>
             <SoftBox
               sx={{
@@ -203,32 +181,6 @@ function UsersManagement(props) {
         </SoftBox>
       </SoftBox>
 
-      <Dialog open={open} onClose={handleCloseRejectDialog}>
-        <DialogTitle>Reason for Rejecting</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please provide a reason for rejecting this item.
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="reason"
-            label="Rejection Reason"
-            type="text"
-            fullWidth
-            value={rejectionReason}
-            onChange={(e) => setRejectionReason(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseRejectDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleReject} color="primary">
-            Reject
-          </Button>
-        </DialogActions>
-      </Dialog>
     </DashboardLayout>
   );
 }
