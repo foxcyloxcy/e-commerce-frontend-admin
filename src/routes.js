@@ -3,6 +3,8 @@ import Dashboard from "layouts/dashboard";
 import ItemsManagementTable from "layouts/ItemsManagementTable";
 import ItemsApprovalTable from "layouts/ItemsApprovalTable"
 import GenerateDiscountCodes from "layouts/GenerateDiscountCodes";
+import TransactionsList from "layouts/TransactionsListTable";
+import UsersManagement from "layouts/UsersManagementTable";
 import Billing from "layouts/billing";
 // import VirtualReality from "layouts/virtual-reality";
 import RTL from "layouts/rtl";
@@ -39,7 +41,23 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Discount Codes",
+    name: "Transactions",
+    key: "transactions-list",
+    route: "/transactions-list",
+    component: TransactionsList,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "Users management",
+    key: "users-management",
+    route: "/users-management",
+    component: UsersManagement,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "Discount codes",
     key: "generate-discount",
     route: "/generate-discount",
     component: GenerateDiscountCodes,
