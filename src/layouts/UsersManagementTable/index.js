@@ -120,11 +120,25 @@ function UsersManagement(props) {
             >
               <Table columns={columns} rows={rows} />
               <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={2}>
-                <SoftButton onClick={handlePreviousPage} disabled={currentPage === 1}>
+                <SoftButton
+                  component="button"
+                  variant="contained"
+                  color="primary"
+                  fontWeight="small"
+                  onClick={handlePreviousPage} 
+                  disabled={currentPage === 1}
+                >
                   Previous
                 </SoftButton>
                 <SoftTypography variant="caption">Page {currentPage} of {totalPages}</SoftTypography>
-                <SoftButton onClick={handleNextPage} disabled={currentPage === totalPages}>
+                <SoftButton 
+                    component="button"
+                    variant="contained"
+                    color="primary"
+                    fontWeight="small"
+                    onClick={handleNextPage} 
+                    disabled={currentPage === totalPages}
+                  >
                   Next
                 </SoftButton>
               </SoftBox>
