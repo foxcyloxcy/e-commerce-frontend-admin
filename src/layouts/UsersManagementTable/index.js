@@ -28,9 +28,6 @@ function UsersManagement(props) {
   const [authorsTableData, setAuthorsTableData] = useState(initialAuthorsTableData);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [open, setOpen] = useState(false);
-  const [selectedItemId, setSelectedItemId] = useState(null);
-  const [rejectionReason, setRejectionReason] = useState("");
 
   const loadProducts = useCallback(async (page = 1) => {
     try {
@@ -82,49 +79,11 @@ function UsersManagement(props) {
     loadProducts(currentPage);
   }, [loadProducts, currentPage]);
 
-  const handleApprove = async (itemId) => {
-    try {
-      const res = await api.patch(`items/approve/${itemId}`, 
-        { status: 1 },
-        { headers: { 'Authorization': `Bearer ${userToken}` } }
-      );
-      if (res.status === 200) {
-        loadProducts(currentPage);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleOpenRejectDialog = (itemId) => {
-    setSelectedItemId(itemId);
-    setOpen(true);
-  };
 
   const dateFormatter = (dateToFormat) => {
     return moment(dateToFormat).format('YYYY/MM/DD, h:mm a');
   };
 
-  const handleCloseRejectDialog = () => {
-    setOpen(false);
-    setSelectedItemId(null);
-    setRejectionReason("");
-  };
-
-  const handleReject = async () => {
-    try {
-      const res = await api.patch(`items/reject/${selectedItemId}`, 
-        { status: 2, reject_reason: rejectionReason },
-        { headers: { 'Authorization': `Bearer ${userToken}` } }
-      );
-      if (res.status === 200) {
-        handleCloseRejectDialog();
-        loadProducts(currentPage);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
