@@ -11,8 +11,8 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import Table from "examples/Tables/Table";
+import Pagination from "@mui/material/Pagination";
 import api from "../../assets/baseURL/api";
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, TextField } from "@mui/material";
 import moment from 'moment';
 
 // Initial Data
@@ -28,24 +28,24 @@ const initialAuthorsTableData = {
 };
 
 function GenerateDiscountCodes(props) {
-  const { isLoggedIn, userData, userToken, refreshParentLogout } = props
+  const { isLoggedIn, userData, userToken, refreshParentLogout } = props;
   const [authorsTableData, setAuthorsTableData] = useState(initialAuthorsTableData);
-  const [selectedItemId, setSelectedItemId] = useState(null);
   const [formValues, setFormValues] = useState({ code: '', percentage: '' });
   const [formErrors, setFormErrors] = useState({ code: '', percentage: '' });
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
 
   const loadGeneratedCodes = useCallback(async () => {
     try {
-      const res = await api.get(`discounts?page=1&limit=10`, {
+      const res = await api.get(`discounts?page=${currentPage}&limit=${rowsPerPage}`, {
         headers: {
           'Authorization': `Bearer ${userToken}`
         }
       });
 
       if (res.status === 200) {
-        console.log(res.data)
-        const data = res.data.data.data;
+        const { data, current_page, last_page } = res.data.data;
 
         const newRows = data.map((item) => ({
           'Code': (
@@ -113,33 +113,40 @@ function GenerateDiscountCodes(props) {
           ...prevState,
           rows: newRows,
         }));
+        setCurrentPage(current_page);
+        setTotalPages(last_page);
       }
     } catch (error) {
       console.log(error);
     }
-  }, [userToken]);
+  }, [userToken, currentPage, rowsPerPage]);
 
   useEffect(() => {
     loadGeneratedCodes();
   }, [loadGeneratedCodes]);
 
-  const handleEnableCode = async (id) => {
-    try {
-      const res = await api.patch(`discounts/${id}?`, 
-        { status: 1 },
-        {
-        headers: {
-          'Authorization': `Bearer ${userToken}`
-        }
-      });
-      console.log(res)
-      if (res.status === 200) {
-        loadGeneratedCodes();
-      }
-    } catch (error) {
-      console.log(error);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prevPage => prevPage + 1);
     }
   };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prevPage => prevPage - 1);
+    }
+  };
+
+  const dateFormatter = (dateToFormat) => {
+    return moment(dateToFormat).format('YYYY/MM/DD, h:mm a');
+  };
+
+  const handleInputChange = useCallback((event) => {
+    const { name, value } = event.target;
+    setFormValues({ ...formValues, [name]: value });
+    setFormErrors({ ...formErrors, [name]: '' });
+  }, [formValues, formErrors]);
 
   const handleGenerateCode = async () => {
     let errors = {};
@@ -157,15 +164,12 @@ function GenerateDiscountCodes(props) {
     if (Object.keys(errors).length === 0) {
       try {
         const res = await api.post(`discounts`, 
-          { code: formValues.code,
-            discount_percentage : formValues.percentage
-           },
+          { code: formValues.code, discount_percentage: formValues.percentage },
           {
           headers: {
             'Authorization': `Bearer ${userToken}`
           }
         });
-        console.log(res)
         if (res.status === 200) {
           loadGeneratedCodes();
         }
@@ -175,29 +179,28 @@ function GenerateDiscountCodes(props) {
     }
   };
 
-  const dateFormatter = (dateToFormat) =>{
-    let currentDate = moment(dateToFormat).format('YYYY/MM/DD, h:mm a');
-
-    return currentDate
+const handleEnableCode = async (id) => {
+  try {
+    const res = await api.patch(`discounts/${id}?`, { status: 1 }, {
+      headers: {
+        'Authorization': `Bearer ${userToken}`
+      }
+    });
+    if (res.status === 200) {
+      loadGeneratedCodes();
+    }
+  } catch (error) {
+    console.log(error);
   }
-
-  const handleInputChange = useCallback((event) => {
-    const { name, value } = event.target;
-    setFormValues({ ...formValues, [name]: value });
-    setFormErrors({ ...formErrors, [name]: '' });
-  }, [formValues, formErrors]);
-
+};
 
   const handleDisableCode = async (id) => {
     try {
-      const res = await api.patch(`discounts/${id}?`, 
-        { status: 0 },
-        {
+      const res = await api.patch(`discounts/${id}?`, { status: 0 }, {
         headers: {
           'Authorization': `Bearer ${userToken}`
         }
       });
-      console.log(res)
       if (res.status === 200) {
         loadGeneratedCodes();
       }
@@ -210,7 +213,7 @@ function GenerateDiscountCodes(props) {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar refreshParentLogout={refreshParentLogout}/>
+      <DashboardNavbar refreshParentLogout={refreshParentLogout} />
       <SoftBox py={3}>
         <SoftBox mb={3}>
           <Card>
@@ -261,6 +264,29 @@ function GenerateDiscountCodes(props) {
             </SoftBox>
           </Card>
         </SoftBox>
+        <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={2}>
+                <SoftButton
+                  component="button"
+                  variant="contained"
+                  color="primary"
+                  fontWeight="small"
+                  onClick={handlePreviousPage} 
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </SoftButton>
+                <SoftTypography variant="caption">Page {currentPage} of {totalPages}</SoftTypography>
+                <SoftButton 
+                    component="button"
+                    variant="contained"
+                    color="primary"
+                    fontWeight="small"
+                    onClick={handleNextPage} 
+                    disabled={currentPage === totalPages}
+                  >
+                  Next
+                </SoftButton>
+              </SoftBox>
       </SoftBox>
     </DashboardLayout>
   );
