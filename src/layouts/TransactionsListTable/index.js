@@ -29,6 +29,7 @@ function TransactionsList(props) {
   const [authorsTableData, setAuthorsTableData] = useState(initialAuthorsTableData);
   const [open, setOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [selectedTransactionItem, setSelectedTransactionItem] = useState(null);
 
   const loadProducts = useCallback(async () => {
     try {
@@ -68,12 +69,12 @@ function TransactionsList(props) {
           ),
           Buyer: (
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
-              {transaction.buyer.first_name} {transaction.buyer.last_name}
+              {transaction.buyer?.first_name} {transaction.buyer?.last_name}
             </SoftTypography>
           ),
           Seller: (
             <SoftTypography variant="caption" color="secondary" fontWeight="medium">
-              {transaction.seller.first_name} {transaction.seller.last_name}
+              {transaction.seller?.first_name} {transaction.seller?.last_name}
             </SoftTypography>
           ),
           action: (
@@ -106,9 +107,25 @@ function TransactionsList(props) {
     loadProducts();
   }, [loadProducts]);
 
-  const handleOpenModal = (transaction) => {
-    setSelectedTransaction(transaction);
-    setOpen(true);
+  const handleOpenModal = async (transaction) => {
+
+    try {
+        const res = await api.get(`transactions/${transaction.uuid}`, {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+  
+        if (res.status === 200) {
+
+          const transactionData = res.data.data.transaction;
+          setSelectedTransactionItem(transaction)
+          setSelectedTransaction(transactionData);
+          setOpen(true);
+        }
+      } catch (error) {
+        console.log(error);
+      }
   };
 
   const handleCloseModal = () => {
@@ -154,27 +171,29 @@ function TransactionsList(props) {
           <DialogTitle id="transaction-details-dialog">Transaction Details</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              <strong>Buyer:</strong> {selectedTransaction.buyer.first_name}{" "}
-              {selectedTransaction.buyer.last_name} <br />
-              <strong>Buyer Mobile:</strong> {selectedTransaction.buyer.mobile_number} <br />
-              <strong>Buyer Email:</strong> {selectedTransaction.buyer.email} <br />
+              <strong>Buyer:</strong> {selectedTransaction.buyer?.first_name}{" "}
+              {selectedTransaction.buyer?.last_name} <br />
+              <strong>Buyer Mobile:</strong> {selectedTransaction.buyer?.mobile_number} <br />
+              <strong>Buyer Email:</strong> {selectedTransaction.buyer?.email} <br />
               <br />
-              <strong>Seller:</strong> {selectedTransaction.seller.first_name}{" "}
-              {selectedTransaction.seller.last_name} <br />
-              <strong>Seller Mobile:</strong> {selectedTransaction.seller.mobile_number} <br />
-              <strong>Seller Email:</strong> {selectedTransaction.seller.email} <br />
+              <strong>Seller:</strong> {selectedTransaction.seller?.first_name||""}{" "}
+              {selectedTransaction.seller?.last_name} <br />
+              <strong>Seller Mobile:</strong> {selectedTransaction.seller?.mobile_number} <br />
+              <strong>Seller Email:</strong> {selectedTransaction.seller?.email} <br />
               <br />
-              <strong>Date of Transaction:</strong> {dateFormatter(selectedTransaction.transaction_item.created_at)}{" "}
+              <strong>Date of Transaction:</strong> {dateFormatter(selectedTransaction.transaction_item?.created_at)}{" "}
               <br />
+              <strong>Item Price:</strong>{" "}
+              {selectedTransactionItem.transaction_item?.item?.price} <br />
               <strong>Item Total:</strong>{" "}
-              {selectedTransaction.transaction_item.item?.total_fee_breakdown?.item} <br />
+              {selectedTransactionItem.transaction_item?.item?.total_fee_breakdown?.total} <br />
               <strong>Platform Fee Percentage:</strong>{" "}
-              {selectedTransaction.transaction_item.item?.total_fee_breakdown?.platform_fee_percentage}{" "}
+              {selectedTransactionItem.transaction_item?.item?.total_fee_breakdown?.platform_fee_percentage}{" "}
               <br />
               <strong>Platform Fee:</strong>{" "}
-              {selectedTransaction.transaction_item.item?.total_fee_breakdown?.platform_fee} <br />
+              {selectedTransactionItem.transaction_item?.item?.total_fee_breakdown?.platform_fee} <br />
               <strong>Transaction Price:</strong>{" "}
-              {selectedTransaction.transaction_item.item?.total_fee_breakdown?.total} <br />
+              {selectedTransactionItem.transaction_item?.item?.total_fee_breakdown?.total} <br />
             </DialogContentText>
           </DialogContent>
           <DialogActions>
