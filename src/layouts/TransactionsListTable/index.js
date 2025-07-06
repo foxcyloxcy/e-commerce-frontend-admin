@@ -183,6 +183,8 @@ function TransactionsList(props) {
               <br />
               <strong>Date of Transaction:</strong> {dateFormatter(selectedTransaction.transaction_item?.created_at)}{" "}
               <br />
+              <strong>Item Name:</strong>{" "}
+              {selectedTransactionItem.transaction_item?.item?.item_name} <br />
               <strong>Item Price:</strong>{" "}
               {selectedTransactionItem.transaction_item?.item?.price} <br />
               <strong>Item Total:</strong>{" "}
