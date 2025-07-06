@@ -106,6 +106,7 @@ function SignIn({ refreshParent }) {
             type="email"
             placeholder="Email"
             name="email"
+            icon={{ component: "input", direction: "none" }}
             value={formValues.email}
             onChange={handleInputChange}
             error={!!formErrors.email}
@@ -126,6 +127,7 @@ function SignIn({ refreshParent }) {
             type="password"
             placeholder="Password"
             name="password"
+            icon={{ component: "input", direction: "none" }}
             value={formValues.password}
             onChange={handleInputChange}
             error={!!formErrors.password}
