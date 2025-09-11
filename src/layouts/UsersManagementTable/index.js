@@ -17,6 +17,8 @@ const initialAuthorsTableData = {
   columns: [
     { name: "Full name", align: "left" },
     { name: "Email", align: "left" },
+    { name: "DOB", align: "left" },
+    { name: "Gender", align: "left" },
     { name: "Phone no.", align: "left" },
     { name: "Created at", align: "left" },
   ],
@@ -39,6 +41,7 @@ function UsersManagement(props) {
 
       if (res.status === 200) {
         const data = res.data.data;
+        console.log(data)
         setTotalPages(data.last_page);
 
         const newRows = data.data.map((user) => ({
@@ -51,6 +54,27 @@ function UsersManagement(props) {
             <SoftTypography variant="caption" color="secondary" fontWeight="small"
               style={{ whiteSpace: "normal", wordWrap: "break-word", width: '50px' }}>
               {user.email}
+            </SoftTypography>
+          ),
+          'DOB': (
+            <SoftTypography variant="caption" color="secondary" fontWeight="small"
+              style={{ whiteSpace: "normal", wordWrap: "break-word", width: '50px' }}>
+              {
+              user.date_of_birth === null ? 
+              ('Not Set'):
+              (user.date_of_birth)
+            }
+            </SoftTypography>
+          ),
+          'Gender': (
+            <SoftTypography variant="caption" color="secondary" fontWeight="small"
+              style={{ whiteSpace: "normal", wordWrap: "break-word", width: '50px' }}>
+              {
+                user.gender_text === "N/A" ?
+                  ('Other')
+                  :
+                  (user.gender_text)
+              }
             </SoftTypography>
           ),
           'Phone no.': (
@@ -101,7 +125,7 @@ function UsersManagement(props) {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar refreshParentLogout={refreshParentLogout}/>
+      <DashboardNavbar refreshParentLogout={refreshParentLogout} />
       <SoftBox py={3}>
         <SoftBox mb={3}>
           <Card>
@@ -125,20 +149,20 @@ function UsersManagement(props) {
                   variant="contained"
                   color="primary"
                   fontWeight="small"
-                  onClick={handlePreviousPage} 
+                  onClick={handlePreviousPage}
                   disabled={currentPage === 1}
                 >
                   Previous
                 </SoftButton>
                 <SoftTypography variant="caption">Page {currentPage} of {totalPages}</SoftTypography>
-                <SoftButton 
-                    component="button"
-                    variant="contained"
-                    color="primary"
-                    fontWeight="small"
-                    onClick={handleNextPage} 
-                    disabled={currentPage === totalPages}
-                  >
+                <SoftButton
+                  component="button"
+                  variant="contained"
+                  color="primary"
+                  fontWeight="small"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                >
                   Next
                 </SoftButton>
               </SoftBox>
