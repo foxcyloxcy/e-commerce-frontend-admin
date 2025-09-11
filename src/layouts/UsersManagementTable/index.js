@@ -60,10 +60,10 @@ function UsersManagement(props) {
             <SoftTypography variant="caption" color="secondary" fontWeight="small"
               style={{ whiteSpace: "normal", wordWrap: "break-word", width: '50px' }}>
               {
-              user.date_of_birth === null ? 
-              ('Not Set'):
-              (user.date_of_birth)
-            }
+                user.date_of_birth === null ?
+                  ('Not Set') :
+                  (user.date_of_birth)
+              }
             </SoftTypography>
           ),
           'Gender': (
