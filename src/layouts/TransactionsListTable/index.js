@@ -7,64 +7,60 @@ import SoftButton from "components/SoftButton";
 import Table from "examples/Tables/Table";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, TextField } from "@mui/material";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import api from "../../assets/baseURL/api";
 import moment from "moment";
 
 // Initial Data
-const initialAuthorsTableData = {
+const initialTransactionsTableData = {
   columns: [
     { name: "Date of Transaction", align: "left" },
     { name: "Transaction price", align: "left" },
     { name: "Platform fee", align: "left" },
     { name: "Buyer", align: "left" },
     { name: "Seller", align: "center" },
-    { name: "action", align: "center" },
+    { name: "Action", align: "center" },
   ],
   rows: [],
 };
 
 function TransactionsList(props) {
-  const { isLoggedIn, userData, userToken, refreshParentLogout } = props;
-  const [authorsTableData, setAuthorsTableData] = useState(initialAuthorsTableData);
+  const { userToken, refreshParentLogout } = props;
+  const [transactionsTableData, setTransactionsTableData] = useState(initialTransactionsTableData);
   const [open, setOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [selectedTransactionItem, setSelectedTransactionItem] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const loadProducts = useCallback(async () => {
+  const dateFormatter = (dateToFormat) =>
+    moment(dateToFormat).format("YYYY/MM/DD, h:mm a");
+
+  const loadTransactions = useCallback(async (page = 1) => {
     try {
-      const res = await api.get("transactions?page=1&limit=1000", {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
+      const res = await api.get(`transactions?page=${page}`, {
+        headers: { Authorization: `Bearer ${userToken}` },
       });
 
       if (res.status === 200) {
-        const data = res.data.data.data;
+                console.log(res.data.data)
+        const data = res.data.data;
+        setTotalPages(data.last_page);
 
-        const newRows = data.map((transaction) => ({
+        const newRows = data.data.map((transaction) => ({
           "Date of Transaction": (
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
-              {dateFormatter(transaction.transaction_item.created_at)}
+              {dateFormatter(transaction.transaction_item?.created_at)}
             </SoftTypography>
           ),
           "Transaction price": (
-            <SoftTypography
-              variant="caption"
-              color="secondary"
-              fontWeight="small"
-              style={{
-                whiteSpace: "normal",
-                wordWrap: "break-word",
-                width: "50px",
-              }}
-            >
-              {transaction.transaction_item.item?.total_fee_breakdown?.total}
+            <SoftTypography variant="caption" color="secondary" fontWeight="small">
+              {transaction.transaction_item?.item?.total_fee_breakdown?.total ?? "N/A"}
             </SoftTypography>
           ),
           "Platform fee": (
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
-              {transaction.transaction_item.item?.total_fee_breakdown?.platform_fee}
+              {transaction.transaction_item?.item?.total_fee_breakdown?.platform_fee ?? "N/A"}
             </SoftTypography>
           ),
           Buyer: (
@@ -77,7 +73,7 @@ function TransactionsList(props) {
               {transaction.seller?.first_name} {transaction.seller?.last_name}
             </SoftTypography>
           ),
-          action: (
+          Action: (
             <SoftBox display="flex" flexDirection="column">
               <SoftButton
                 component="button"
@@ -93,52 +89,55 @@ function TransactionsList(props) {
           ),
         }));
 
-        setAuthorsTableData((prevState) => ({
+        setTransactionsTableData((prevState) => ({
           ...prevState,
           rows: newRows,
         }));
       }
     } catch (error) {
-      console.log(error);
+      if (error.response?.status === 401) {
+        refreshParentLogout();
+      } else {
+        console.error(error);
+      }
     }
-  }, [userToken]);
+  }, [userToken, refreshParentLogout]);
 
   useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
+    loadTransactions(currentPage);
+  }, [currentPage]);
 
   const handleOpenModal = async (transaction) => {
-
     try {
-        const res = await api.get(`transactions/${transaction.uuid}`, {
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        });
-  
-        if (res.status === 200) {
+      const res = await api.get(`transactions/${transaction.uuid}`, {
+        headers: { Authorization: `Bearer ${userToken}` },
+      });
 
-          const transactionData = res.data.data.transaction;
-          setSelectedTransactionItem(transaction)
-          setSelectedTransaction(transactionData);
-          setOpen(true);
-        }
-      } catch (error) {
-        console.log(error);
+      if (res.status === 200) {
+        setSelectedTransaction(transaction);
+        setSelectedTransactionItem(res.data.data.transaction);
+        setOpen(true);
       }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleCloseModal = () => {
     setOpen(false);
     setSelectedTransaction(null);
+    setSelectedTransactionItem(null);
   };
 
-  const dateFormatter = (dateToFormat) => {
-    let currentDate = moment(dateToFormat).format("YYYY/MM/DD, h:mm a");
-    return currentDate;
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
-  const { columns, rows } = authorsTableData;
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+  };
+
+  const { columns, rows } = transactionsTableData;
 
   return (
     <DashboardLayout>
@@ -160,29 +159,56 @@ function TransactionsList(props) {
               }}
             >
               <Table columns={columns} rows={rows} />
+
+              {/* Pagination */}
+              <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={2}>
+                <SoftButton
+                  component="button"
+                  variant="contained"
+                  color="primary"
+                  fontWeight="small"
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </SoftButton>
+                <SoftTypography variant="caption">
+                  Page {currentPage} of {totalPages}
+                </SoftTypography>
+                <SoftButton
+                  component="button"
+                  variant="contained"
+                  color="primary"
+                  fontWeight="small"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </SoftButton>
+              </SoftBox>
             </SoftBox>
           </Card>
         </SoftBox>
       </SoftBox>
 
       {/* Modal for Transaction Details */}
-      {selectedTransaction && (
+      {selectedTransactionItem && (
         <Dialog open={open} aria-labelledby="transaction-details-dialog">
           <DialogTitle id="transaction-details-dialog">Transaction Details</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              <strong>Buyer:</strong> {selectedTransaction.buyer?.first_name}{" "}
-              {selectedTransaction.buyer?.last_name} <br />
-              <strong>Buyer Mobile:</strong> {selectedTransaction.buyer?.mobile_number} <br />
-              <strong>Buyer Email:</strong> {selectedTransaction.buyer?.email} <br />
+              <strong>Buyer:</strong> {selectedTransactionItem.buyer?.first_name}{" "}
+              {selectedTransactionItem.buyer?.last_name} <br />
+              <strong>Buyer Mobile:</strong> {selectedTransactionItem.buyer?.mobile_number} <br />
+              <strong>Buyer Email:</strong> {selectedTransactionItem.buyer?.email} <br />
               <br />
-              <strong>Seller:</strong> {selectedTransaction.seller?.first_name||""}{" "}
-              {selectedTransaction.seller?.last_name} <br />
-              <strong>Seller Mobile:</strong> {selectedTransaction.seller?.mobile_number} <br />
-              <strong>Seller Email:</strong> {selectedTransaction.seller?.email} <br />
+              <strong>Seller:</strong> {selectedTransactionItem.seller?.first_name}{" "}
+              {selectedTransactionItem.seller?.last_name} <br />
+              <strong>Seller Mobile:</strong> {selectedTransactionItem.seller?.mobile_number} <br />
+              <strong>Seller Email:</strong> {selectedTransactionItem.seller?.email} <br />
               <br />
-              <strong>Date of Transaction:</strong> {dateFormatter(selectedTransaction.transaction_item?.created_at)}{" "}
-              <br />
+              <strong>Date of Transaction:</strong>{" "}
+              {dateFormatter(selectedTransactionItem.transaction_item?.created_at)} <br />
               <strong>Item Name:</strong>{" "}
               {selectedTransactionItem.transaction_item?.item?.item_name} <br />
               <strong>Item Price:</strong>{" "}
@@ -200,12 +226,14 @@ function TransactionsList(props) {
           </DialogContent>
           <DialogActions>
             <SoftButton
-                component="button"
-                variant="contained"
-                color="primary"
-                fontWeight="small"
-                onClick={handleCloseModal}
-              >Close</SoftButton>
+              component="button"
+              variant="contained"
+              color="primary"
+              fontWeight="small"
+              onClick={handleCloseModal}
+            >
+              Close
+            </SoftButton>
           </DialogActions>
         </Dialog>
       )}
