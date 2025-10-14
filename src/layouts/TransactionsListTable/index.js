@@ -210,18 +210,18 @@ function TransactionsList(props) {
               <strong>Date of Transaction:</strong>{" "}
               {dateFormatter(selectedTransactionItem.transaction_item?.created_at)} <br />
               <strong>Item Name:</strong>{" "}
-              {selectedTransactionItem.transaction_item?.item?.item_name} <br />
+              {selectedTransactionItem?.item} <br />
               <strong>Item Price:</strong>{" "}
-              {selectedTransactionItem.transaction_item?.item?.price} <br />
-              <strong>Item Total:</strong>{" "}
-              {selectedTransactionItem.transaction_item?.item?.total_fee_breakdown?.total} <br />
-              <strong>Platform Fee Percentage:</strong>{" "}
+              {selectedTransactionItem?.payment_breakdown?.item_price} <br />
+              {/* <strong>Item Total:</strong>{" "}
+              {selectedTransactionItem.transaction_item?.item?.total_fee_breakdown?.total} <br /> */}
+              {/* <strong>Platform Fee Percentage:</strong>{" "}
               {selectedTransactionItem.transaction_item?.item?.total_fee_breakdown?.platform_fee_percentage}{" "}
-              <br />
+              <br /> */}
               <strong>Platform Fee:</strong>{" "}
-              {selectedTransactionItem.transaction_item?.item?.total_fee_breakdown?.platform_fee} <br />
-              <strong>Transaction Price:</strong>{" "}
-              {selectedTransactionItem.transaction_item?.item?.total_fee_breakdown?.total} <br />
+              {selectedTransactionItem?.payment_breakdown?.platform_fee_} <br />
+              {/* <strong>Transaction Price:</strong>{" "}
+              {selectedTransactionItem.transaction_item?.item?.total_fee_breakdown?.total} <br /> */}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
