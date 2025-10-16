@@ -64,6 +64,7 @@ function ItemsManagementTable(props) {
                   alt={item.item_name}
                   size="md"
                   variant="rounded"
+                  bgColor="transparent"
                 />
               </SoftBox>
             ),
