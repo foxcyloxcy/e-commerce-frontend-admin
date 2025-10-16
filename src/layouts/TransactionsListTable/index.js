@@ -65,7 +65,10 @@ function TransactionsList(props) {
           ),
           Buyer: (
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
-              {transaction.buyer?.first_name} {transaction.buyer?.last_name}
+              {(transaction.buyer) ? 
+              "Site Visitor"
+              :
+              transaction.buyer?.first_name+" "+transaction.buyer?.last_name }
             </SoftTypography>
           ),
           Seller: (
