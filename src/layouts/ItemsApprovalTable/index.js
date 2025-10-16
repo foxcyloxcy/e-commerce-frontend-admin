@@ -95,6 +95,7 @@ function ItemsApprovalTable(props) {
                   alt={item.item_name}
                   size="sm"
                   variant="rounded"
+                  bgColor="transparent"
                 />
               </SoftBox>
             ),
