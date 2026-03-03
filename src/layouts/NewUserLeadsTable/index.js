@@ -1,90 +1,164 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import {
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  TableContainer,
-  Paper,
-  Pagination,
-  Typography,
-  Box,
-} from "@mui/material";
+/* eslint-disable react/prop-types */
+import React, { useCallback, useEffect, useState } from "react";
+import Card from "@mui/material/Card";
+import SoftBox from "components/SoftBox";
+import SoftTypography from "components/SoftTypography";
+import SoftButton from "components/SoftButton";
+import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
+import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import Table from "examples/Tables/Table";
+import api from "../../assets/baseURL/api";
+import moment from "moment";
 
-export default function UserLeadsTable() {
-  const [leads, setLeads] = useState([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
+const initialTableData = {
+  columns: [
+    { name: "first name", align: "left" },
+    { name: "last name", align: "left" },
+    { name: "email", align: "left" },
+    { name: "joined on", align: "center" },
+  ],
+  rows: [],
+};
 
-  const fetchLeads = async (pageNumber = 1) => {
-    try {
-      setLoading(true);
+function UserLeadsManagementTable({ userToken, refreshParentLogout }) {
+  const [tableData, setTableData] = useState(initialTableData);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-      const res = await axios.get(
-        `https://api.therelovedmarketplace.com/api/user-leads?page=${pageNumber}`
-      );
+  const rowsPerPage = 10;
 
-      setLeads(res.data.data);
-      setTotalPages(res.data.last_page);
-      setPage(res.data.current_page);
-    } catch (error) {
-      console.error("Error fetching leads:", error);
-    } finally {
-      setLoading(false);
+  const loadLeads = useCallback(
+    async (page = 1) => {
+      try {
+        const res = await api.get(
+          `user-leads?page=${page}&per_page=${rowsPerPage}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          }
+        );
+
+        if (res.status === 200) {
+          const data = res.data.data;
+
+          const newRows = data.map((lead) => ({
+            "first name": (
+              <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+                {lead.first_name}
+              </SoftTypography>
+            ),
+            "last name": (
+              <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+                {lead.last_name}
+              </SoftTypography>
+            ),
+            email: (
+              <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+                {lead.email}
+              </SoftTypography>
+            ),
+            "joined on": (
+              <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+                {moment(lead.created_at).format("YYYY/MM/DD, h:mm a")}
+              </SoftTypography>
+            ),
+          }));
+
+          setTableData((prev) => ({
+            ...prev,
+            rows: newRows,
+          }));
+
+          setTotalItems(res.data.total);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [userToken]
+  );
+
+  useEffect(() => {
+    loadLeads(currentPage);
+  }, [loadLeads, currentPage]);
+
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
     }
   };
 
-  useEffect(() => {
-    fetchLeads(page);
-  }, [page]);
-
-  const handlePageChange = (event, value) => {
-    setPage(value);
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
   };
 
+  const { columns, rows } = tableData;
+
   return (
-    <Box p={4}>
-      <Typography variant="h5" gutterBottom>
-        User Leads
-      </Typography>
+    <DashboardLayout>
+      <DashboardNavbar refreshParentLogout={refreshParentLogout} />
+      <SoftBox py={3}>
+        <SoftBox mb={3}>
+          <Card>
+            <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+              <SoftTypography variant="h6">
+                User Leads
+              </SoftTypography>
+            </SoftBox>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>First Name</TableCell>
-              <TableCell>Last Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Created At</TableCell>
-            </TableRow>
-          </TableHead>
+            <SoftBox
+              sx={{
+                "& .MuiTableRow-root:not(:last-child)": {
+                  "& td": {
+                    borderBottom: ({ borders: { borderWidth, borderColor } }) =>
+                      `${borderWidth[1]} solid ${borderColor}`,
+                  },
+                },
+              }}
+            >
+              <Table columns={columns} rows={rows} />
+            </SoftBox>
 
-          <TableBody>
-            {leads.map((lead, index) => (
-              <TableRow key={index}>
-                <TableCell>{lead.first_name}</TableCell>
-                <TableCell>{lead.last_name}</TableCell>
-                <TableCell>{lead.email}</TableCell>
-                <TableCell>
-                  {new Date(lead.created_at).toLocaleString()}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            <SoftBox
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              p={2}
+            >
+              <SoftButton
+                variant="contained"
+                color="primary"
+                fontWeight="small"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </SoftButton>
 
-      <Box mt={3} display="flex" justifyContent="center">
-        <Pagination
-          count={totalPages}
-          page={page}
-          onChange={handlePageChange}
-          color="primary"
-        />
-      </Box>
-    </Box>
+              <SoftTypography variant="caption">
+                Page {currentPage} of {totalPages || 1}
+              </SoftTypography>
+
+              <SoftButton
+                variant="contained"
+                color="primary"
+                fontWeight="small"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages || totalPages === 0}
+              >
+                Next
+              </SoftButton>
+            </SoftBox>
+          </Card>
+        </SoftBox>
+      </SoftBox>
+    </DashboardLayout>
   );
 }
+
+export default UserLeadsManagementTable;
