@@ -6,6 +6,7 @@ import GenerateDiscountCodes from "layouts/GenerateDiscountCodes";
 import TransactionsList from "layouts/TransactionsListTable";
 import UsersManagement from "layouts/UsersManagementTable";
 import Billing from "layouts/billing";
+import UserLeadsTable from "layouts/NewUserLeadsTable";
 // import VirtualReality from "layouts/virtual-reality";
 import RTL from "layouts/rtl";
 import Profile from "layouts/profile";
@@ -77,6 +78,14 @@ const routes = [
     key: "items-approval",
     route: "/items-approval",
     component: ItemsApprovalTable,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "User leads",
+    key: "user-leads",
+    route: "/user-leads",
+    component: UserLeadsTable,
     noCollapse: true,
   },
   { type: "title", title: "Account Pages", key: "account-pages" },
