@@ -8,6 +8,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Table from "examples/Tables/Table";
 import api from "../../assets/baseURL/api";
+import axios from "axios";
 import moment from "moment";
 
 const initialTableData = {
@@ -30,8 +31,8 @@ function UserLeadsManagementTable({ userToken, refreshParentLogout }) {
   const loadLeads = useCallback(
     async (page = 1) => {
       try {
-        const res = await api.get(
-          `user-leads?page=${page}&per_page=${rowsPerPage}`,
+        const res = await axios.get(
+          `https://api.therelovedmarketplace.com/api/user-leads?page=${page}&per_page=${rowsPerPage}`,
           {
             headers: {
               Authorization: `Bearer ${userToken}`,
