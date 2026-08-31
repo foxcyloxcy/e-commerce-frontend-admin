@@ -12,7 +12,6 @@ import Table from "examples/Tables/Table";
 import api from "../../assets/baseURL/api";
 import Swal from "sweetalert2";
 import moment from "moment";
-import Pagination from "@mui/material/Pagination";
 
 // Initial Data
 const initialAuthorsTableData = {

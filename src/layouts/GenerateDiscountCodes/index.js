@@ -11,7 +11,6 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import Table from "examples/Tables/Table";
-import Pagination from "@mui/material/Pagination";
 import api from "../../assets/baseURL/api";
 import moment from 'moment';
 
