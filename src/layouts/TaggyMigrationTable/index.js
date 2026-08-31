@@ -342,8 +342,6 @@ function MigrationDetailsDialog({ open, loading, migration, onClose }) {
               <Detail label="Address" value={migration.profile.address} />
               <Detail label="Date of birth" value={migration.profile.date_of_birth} />
               <Detail label="Member since" value={formatDate(migration.profile.member_since)} />
-              <Detail label="Source user ID" value={migration.profile.source_user_id} />
-              <Detail label="Snapshot created" value={formatDate(migration.profile.snapshot_at)} />
             </DetailSection>
 
             <DetailSection title="Consent audit">
