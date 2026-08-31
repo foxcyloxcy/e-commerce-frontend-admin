@@ -26,7 +26,6 @@ const initialTableData = {
     { name: "Migration status", align: "left" },
     { name: "Selected items", align: "center" },
     { name: "Submitted date", align: "left" },
-    { name: "Mapping status", align: "center" },
     { name: "Action", align: "center" },
   ],
   rows: [],
@@ -36,22 +35,10 @@ const emptyFilters = {
   search: "",
   decision: "",
   submitted_date: "",
-  mapping_status: "",
 };
 
 const statusLabel = (status) =>
   status === "CONSENT_ACCOUNT_AND_ITEMS" ? "Account + Items" : "Account Only";
-
-const mappingLabel = (status) => {
-  if (!status) return "Not prepared";
-  return status.charAt(0).toUpperCase() + status.slice(1);
-};
-
-const mappingColor = (status) => {
-  if (status === "complete") return "success";
-  if (status === "incomplete") return "warning";
-  return "secondary";
-};
 
 const formatDate = (date) => (date ? moment(date).format("YYYY/MM/DD, h:mm a") : "N/A");
 
@@ -108,15 +95,6 @@ function TaggyMigrationTable({ userToken, refreshParentLogout }) {
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
               {formatDate(migration.submitted_at)}
             </SoftTypography>
-          ),
-          "Mapping status": (
-            <SoftBadge
-              variant="gradient"
-              badgeContent={mappingLabel(migration.mapping_status)}
-              color={mappingColor(migration.mapping_status)}
-              size="xs"
-              container
-            />
           ),
           Action: (
             <SoftButton
@@ -212,13 +190,6 @@ function TaggyMigrationTable({ userToken, refreshParentLogout }) {
                   <MenuItem value="">All consented</MenuItem>
                   <MenuItem value="CONSENT_ACCOUNT_AND_ITEMS">Account + Items</MenuItem>
                   <MenuItem value="CONSENT_ACCOUNT_ONLY">Account Only</MenuItem>
-                </FilterSelect>
-              </FilterField>
-              <FilterField label="Mapping status" width={{ xs: "calc(100% - 1rem)", sm: 160 }}>
-                <FilterSelect name="mapping_status" value={filters.mapping_status} onChange={updateFilter}>
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="complete">Complete</MenuItem>
-                  <MenuItem value="incomplete">Incomplete</MenuItem>
                 </FilterSelect>
               </FilterField>
               <FilterField label="Submitted date" width={{ xs: "calc(100% - 1rem)", sm: 170 }}>
@@ -337,7 +308,6 @@ function MigrationDetailsDialog({ open, loading, migration, onClose }) {
       { name: "Item", align: "left" },
       { name: "Price", align: "left" },
       { name: "Snapshot status", align: "left" },
-      { name: "Mapping status", align: "center" },
     ],
     rows: (migration?.items || []).map((item) => ({
       Item: (
@@ -352,15 +322,6 @@ function MigrationDetailsDialog({ open, loading, migration, onClose }) {
       ),
       Price: `AED ${item.price || 0}`,
       "Snapshot status": item.status_name || "N/A",
-      "Mapping status": (
-        <SoftBadge
-          variant="gradient"
-          badgeContent={mappingLabel(item.mapping_status)}
-          color={mappingColor(item.mapping_status)}
-          size="xs"
-          container
-        />
-      ),
     })),
   };
 
@@ -383,16 +344,11 @@ function MigrationDetailsDialog({ open, loading, migration, onClose }) {
               <Detail label="Member since" value={formatDate(migration.profile.member_since)} />
               <Detail label="Source user ID" value={migration.profile.source_user_id} />
               <Detail label="Snapshot created" value={formatDate(migration.profile.snapshot_at)} />
-              <Detail label="Profile mapping" value={mappingLabel(migration.profile.mapping_status)} />
             </DetailSection>
 
             <DetailSection title="Consent audit">
               <Detail label="Final decision" value={statusLabel(migration.consent.decision)} />
               <Detail label="Submitted at" value={formatDate(migration.consent.submitted_at)} />
-              <Detail label="Consent version" value={migration.consent.consent_version} />
-              <Detail label="Consent version ID" value={migration.consent.consent_version_id} />
-              <Detail label="Selected items count" value={migration.consent.selected_item_count} />
-              <Detail label="Consent content hash" value={migration.consent.consent_content_hash} wrap />
             </DetailSection>
 
             <SoftBox mt={3}>
@@ -440,17 +396,13 @@ function DetailSection({ title, children }) {
   );
 }
 
-function Detail({ label, value, wrap = false }) {
+function Detail({ label, value }) {
   return (
     <SoftBox>
       <SoftTypography variant="caption" color="secondary" fontWeight="medium">
         {label}: {" "}
       </SoftTypography>
-      <SoftTypography
-        variant="caption"
-        color="secondary"
-        sx={wrap ? { overflowWrap: "anywhere" } : undefined}
-      >
+      <SoftTypography variant="caption" color="secondary">
         {value || "N/A"}
       </SoftTypography>
     </SoftBox>
