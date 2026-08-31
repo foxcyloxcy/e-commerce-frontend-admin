@@ -5,12 +5,14 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import MenuItem from "@mui/material/MenuItem";
-import TextField from "@mui/material/TextField";
+import Select from "@mui/material/Select";
 import SoftBadge from "components/SoftBadge";
 import SoftBox from "components/SoftBox";
 import SoftButton from "components/SoftButton";
+import SoftInput from "components/SoftInput";
 import SoftTypography from "components/SoftTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
@@ -24,7 +26,7 @@ const initialTableData = {
     { name: "User", align: "left" },
     { name: "Migration status", align: "left" },
     { name: "Selected items", align: "center" },
-    { name: "Submitted at", align: "left" },
+    { name: "Submitted date", align: "left" },
     { name: "Mapping status", align: "center" },
     { name: "Action", align: "center" },
   ],
@@ -103,7 +105,7 @@ function TaggyMigrationTable({ userToken, refreshParentLogout }) {
               {migration.selected_item_count}
             </SoftTypography>
           ),
-          "Submitted at": (
+          "Submitted date": (
             <SoftTypography variant="caption" color="secondary" fontWeight="small">
               {formatDate(migration.submitted_at)}
             </SoftTypography>
@@ -197,53 +199,41 @@ function TaggyMigrationTable({ userToken, refreshParentLogout }) {
               <SoftTypography variant="h6">Taggy migrations</SoftTypography>
             </SoftBox>
 
-            <SoftBox display="flex" flexWrap="wrap" gap={2} px={3} pb={3} alignItems="center">
-              <TextField
-                size="small"
-                label="Search name or email"
-                name="search"
-                value={filters.search}
-                onChange={updateFilter}
-              />
-              <TextField
-                select
-                size="small"
-                label="Consent type"
-                name="decision"
-                value={filters.decision}
-                onChange={updateFilter}
-                sx={{ minWidth: 180 }}
-              >
-                <MenuItem value="">All consented</MenuItem>
-                <MenuItem value="CONSENT_ACCOUNT_AND_ITEMS">Account + Items</MenuItem>
-                <MenuItem value="CONSENT_ACCOUNT_ONLY">Account Only</MenuItem>
-              </TextField>
-              <TextField
-                select
-                size="small"
-                label="Mapping status"
-                name="mapping_status"
-                value={filters.mapping_status}
-                onChange={updateFilter}
-                sx={{ minWidth: 170 }}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="complete">Complete</MenuItem>
-                <MenuItem value="incomplete">Incomplete</MenuItem>
-              </TextField>
-              <TextField
-                size="small"
-                type="date"
-                label="Submitted date"
-                name="submitted_date"
-                value={filters.submitted_date}
-                onChange={updateFilter}
-                InputLabelProps={{ shrink: true }}
-              />
-              <SoftButton variant="contained" color="primary" onClick={applyFilters}>
+            <SoftBox display="flex" flexWrap="wrap" alignItems="flex-end" sx={{ ml: 1, mb: 2, gap: 1 }}>
+              <FilterField label="Search" width={{ xs: "calc(100% - 1rem)", sm: 210 }}>
+                <SoftInput
+                  placeholder="Name or email"
+                  name="search"
+                  value={filters.search}
+                  onChange={updateFilter}
+                />
+              </FilterField>
+              <FilterField label="Consent type" width={{ xs: "calc(100% - 1rem)", sm: 180 }}>
+                <FilterSelect name="decision" value={filters.decision} onChange={updateFilter}>
+                  <MenuItem value="">All consented</MenuItem>
+                  <MenuItem value="CONSENT_ACCOUNT_AND_ITEMS">Account + Items</MenuItem>
+                  <MenuItem value="CONSENT_ACCOUNT_ONLY">Account Only</MenuItem>
+                </FilterSelect>
+              </FilterField>
+              <FilterField label="Mapping status" width={{ xs: "calc(100% - 1rem)", sm: 160 }}>
+                <FilterSelect name="mapping_status" value={filters.mapping_status} onChange={updateFilter}>
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="complete">Complete</MenuItem>
+                  <MenuItem value="incomplete">Incomplete</MenuItem>
+                </FilterSelect>
+              </FilterField>
+              <FilterField label="Submitted date" width={{ xs: "calc(100% - 1rem)", sm: 170 }}>
+                <SoftInput
+                  type="date"
+                  name="submitted_date"
+                  value={filters.submitted_date}
+                  onChange={updateFilter}
+                />
+              </FilterField>
+              <SoftButton component="button" variant="contained" color="primary" fontWeight="small" onClick={applyFilters}>
                 Filter
               </SoftButton>
-              <SoftButton variant="outlined" color="secondary" onClick={resetFilters}>
+              <SoftButton component="button" variant="contained" color="secondary" fontWeight="small" onClick={resetFilters}>
                 Reset
               </SoftButton>
             </SoftBox>
@@ -259,15 +249,15 @@ function TaggyMigrationTable({ userToken, refreshParentLogout }) {
               }}
             >
               {loading ? (
-                <SoftBox display="flex" justifyContent="center" p={4}>
-                  <CircularProgress size={28} />
+                <SoftBox display="flex" justifyContent="center" p={2}>
+                  <CircularProgress size={24} />
                 </SoftBox>
               ) : error ? (
-                <SoftTypography variant="caption" color="error" display="block" textAlign="center" p={4}>
+                <SoftTypography variant="caption" color="error" display="block" textAlign="center" p={2}>
                   {error}
                 </SoftTypography>
               ) : tableData.rows.length === 0 ? (
-                <SoftTypography variant="caption" color="secondary" display="block" textAlign="center" p={4}>
+                <SoftTypography variant="caption" color="secondary" display="block" textAlign="center" p={2}>
                   No consented migrations found.
                 </SoftTypography>
               ) : (
@@ -275,28 +265,30 @@ function TaggyMigrationTable({ userToken, refreshParentLogout }) {
               )}
             </SoftBox>
 
-            <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={2}>
-              <SoftButton
-                variant="contained"
-                color="primary"
-                onClick={() => setCurrentPage((page) => page - 1)}
-                disabled={currentPage === 1 || loading}
-              >
-                Previous
-              </SoftButton>
-              <SoftTypography variant="caption">
-                Page {currentPage} of {totalPages}
-              </SoftTypography>
-              <SoftButton
-                variant="contained"
-                color="primary"
-                onClick={() => setCurrentPage((page) => page + 1)}
-                disabled={currentPage === totalPages || loading}
-              >
-                Next
-              </SoftButton>
-            </SoftBox>
           </Card>
+        </SoftBox>
+        <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={2}>
+          <SoftButton
+            component="button"
+            variant="contained"
+            color="primary"
+            fontWeight="small"
+            onClick={() => setCurrentPage((page) => page - 1)}
+            disabled={currentPage === 1 || loading}
+          >
+            Previous
+          </SoftButton>
+          <SoftTypography variant="caption">Page {currentPage} of {totalPages}</SoftTypography>
+          <SoftButton
+            component="button"
+            variant="contained"
+            color="primary"
+            fontWeight="small"
+            onClick={() => setCurrentPage((page) => page + 1)}
+            disabled={currentPage === totalPages || loading}
+          >
+            Next
+          </SoftButton>
         </SoftBox>
       </SoftBox>
       <Footer />
@@ -308,6 +300,37 @@ function TaggyMigrationTable({ userToken, refreshParentLogout }) {
         onClose={closeDetails}
       />
     </DashboardLayout>
+  );
+}
+
+function FilterField({ label, width, children }) {
+  return (
+    <SoftBox width={width}>
+      <SoftTypography variant="caption" color="secondary" fontWeight="medium" display="block" mb={0.5}>
+        {label}
+      </SoftTypography>
+      {children}
+    </SoftBox>
+  );
+}
+
+function FilterSelect({ children, ...props }) {
+  return (
+    <Select
+      {...props}
+      size="small"
+      fullWidth
+      sx={{
+        height: "2.5rem !important",
+        padding: "0.5rem 0.75rem !important",
+        display: "flex !important",
+        placeItems: "initial !important",
+        fontSize: "0.875rem !important",
+        "& .MuiSelect-select": { padding: "0 !important", display: "flex", alignItems: "center" },
+      }}
+    >
+      {children}
+    </Select>
   );
 }
 
@@ -345,15 +368,15 @@ function MigrationDetailsDialog({ open, loading, migration, onClose }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth aria-labelledby="migration-details-title">
+    <Dialog open={open} onClose={onClose} aria-labelledby="migration-details-title">
       <DialogTitle id="migration-details-title">Taggy Migration Details</DialogTitle>
-      <DialogContent dividers>
+      <DialogContent>
         {loading ? (
           <SoftBox display="flex" justifyContent="center" p={4}>
             <CircularProgress size={28} />
           </SoftBox>
         ) : migration ? (
-          <SoftBox>
+          <DialogContentText component="div">
             <DetailSection title="Profile migration snapshot">
               <Detail label="Name" value={`${migration.profile.first_name} ${migration.profile.last_name}`} />
               <Detail label="Email" value={migration.profile.email} />
@@ -391,7 +414,7 @@ function MigrationDetailsDialog({ open, loading, migration, onClose }) {
                 </SoftTypography>
               )}
             </SoftBox>
-          </SoftBox>
+          </DialogContentText>
         ) : (
           <SoftTypography variant="caption" color="secondary">
             Migration details are unavailable.
