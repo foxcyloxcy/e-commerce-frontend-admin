@@ -16,7 +16,6 @@ import SoftInput from "components/SoftInput";
 import SoftTypography from "components/SoftTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
 import Table from "examples/Tables/Table";
 import api from "../../assets/baseURL/api";
 import moment from "moment";
@@ -291,8 +290,6 @@ function TaggyMigrationTable({ userToken, refreshParentLogout }) {
           </SoftButton>
         </SoftBox>
       </SoftBox>
-      <Footer />
-
       <MigrationDetailsDialog
         open={open}
         loading={detailLoading}
